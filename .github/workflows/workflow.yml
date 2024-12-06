@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - main
+# Do not attempt concurrent runs.
+concurrency:
+  group: ${{ github.workflow }}
+jobs:
+  jjjob:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache
+        uses: actions/cache@v4
+        # Keep uv cache and Python virtual environment.
+        with:
+          key: ${{ hashFiles('pyproject.toml', 'uv.lock', '.python-version') }}
+          path: |
+            ~/.local/share/uv
+            .venv
+      - run: |
+          # Run!
+          pipx run \
+            uv run --no-dev -m \
+              jjjquery
