@@ -2,6 +2,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "9 2 * * *"
 # Do not attempt concurrent runs.
 concurrency:
   group: ${{ github.workflow }}
@@ -23,3 +25,20 @@ jobs:
           pipx run \
             uv run --no-dev -m \
               jjjquery
+      # Scrape if scheduled run.
+      - if: ${{ github.event_name == 'schedule' }}
+        run: |
+          # Git scrape! https://simonwillison.net/tags/git-scraping/
+          pipx run \
+            uv run --no-dev -m \
+              jjjquery >> jjjquery.log
+
+          # Set git user details to look like this:
+          # schedule (cron: "9 2 * * *") <1658821493@octocat/hello-world/.github/workflows/my-workflow.yml@refs/heads/my_branch>
+          git config user.name "$GITHUB_EVENT_NAME (cron: \"${{ github.event.schedule }}\")"
+          git config user.email "$GITHUB_RUN_ID@$GITHUB_WORKFLOW_REF"
+
+          # Commit scraped data with link to workflow run and push.
+          git add jjjquery.log
+          git commit -m "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || exit 0
+          git push
