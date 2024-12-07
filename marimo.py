@@ -14,7 +14,10 @@ async def __():
 
     # Install hacked abc-radio-wrapper.
     await micropip.install(
-        "https://raw.githubusercontent.com/eidorb/jjjquery/refs/heads/main/abc_radio_wrapper-0.3.0-py2.py3-none-any.hacked.whl"
+        [
+            "https://raw.githubusercontent.com/eidorb/jjjquery/refs/heads/main/abc_radio_wrapper-0.3.0-py2.py3-none-any.hacked.whl",
+            "typing-extensions",
+        ]
     )
 
     from_ = mo.ui.datetime(value=datetime(year=2024, month=1, day=1))
