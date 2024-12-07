@@ -20,8 +20,9 @@ I rapidly developed a prototype thanks to [@MatthewBurke1995](https://github.com
 
   ```bash
   zip jjjquery.zip Dockerfile jjjquery.mo.py
+  open .
   ```
-- Upload _jjjquery.zip_
+- Drag and drop _jjjquery.zip_ to deployment settings
 
 
 ## Roadmap

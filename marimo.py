@@ -10,7 +10,6 @@ def __():
 
     import marimo as mo
 
-
     from_ = mo.ui.datetime(value=datetime(year=2024, month=1, day=1))
 
     mo.md(
@@ -42,7 +41,7 @@ def __(ABCRadio, from_, mo, timedelta):
         Search parameters:
         {mo.as_html(dict(from_=from_.value, to=to))}
 
-        First played song: 
+        First played song:
         {mo.as_html(asdict(first_radio_song))}
         """
     )
@@ -63,10 +62,10 @@ def __(first_radio_song, mo):
                 mo.image(first_radio_song.song.album.artwork.url),
                 mo.md(
                     rf"""
-                    **{first_radio_song.song.title}**  
-                    by _{', '.join(artist.name for artist in first_radio_song.song.artists)}_  
-                    from _{first_radio_song.song.album.title}_  
-                    played at {first_radio_song.played_time:%c}  
+                    **{first_radio_song.song.title}**
+                    by _{', '.join(artist.name for artist in first_radio_song.song.artists)}_
+                    from _{first_radio_song.song.album.title}_
+                    played at {first_radio_song.played_time:%c}
                     on `{first_radio_song.channel}`
                     """
                 ),
@@ -124,12 +123,18 @@ def __(abc_radio, datetime, minutes_slider, mo, timedelta):
                 ),
                 mo.hstack(
                     [
-                        mo.image(src=recently_played[0].song.album.artwork.sizes[0].url),
+                        mo.image(
+                            src=recently_played[0].song.album.artwork.sizes[0].url
+                            if recently_played[0].song.album
+                            and recently_played[0].song.album.artwork
+                            and recently_played[0].song.album.artwork.sizes
+                            else ""
+                        ),
                         mo.md(
                             f"""
                             **<span style="color:white">{recently_played[0].song.title}</span>**
 
-                            <span style="color:white">{recently_played[0].song.artists[0].name}</span>  
+                            <span style="color:white">{recently_played[0].song.artists[0].name}</span>
                             <span style="color:white">{recently_played[0].song.album.title}</span>
                             """
                         ),
@@ -161,14 +166,16 @@ def __(abc_radio, datetime, minutes_slider, mo, timedelta):
                                     mo.image(
                                         src=radio_song.song.album.artwork.sizes[0].url
                                         if radio_song.song.album
+                                        and radio_song.song.album.artwork
+                                        and radio_song.song.album.artwork.sizes
                                         else ""
                                     ),
                                     mo.md(
                                         f"""
                                 **{radio_song.song.title}**
-                                
-                                {", ".join(artist.name for artist in radio_song.song.artists)}  
-                                {radio_song.song.album.title if radio_song.song.album else ""}  
+
+                                {", ".join(artist.name for artist in radio_song.song.artists)}
+                                {radio_song.song.album.title if radio_song.song.album else ""}
                                 [YouTube](https://www.youtube.com/results?search_query={" ".join(artist.name for artist in radio_song.song.artists)} {radio_song.song.title})
                                 """
                                     ),
@@ -206,7 +213,6 @@ def __(datetime, mo):
 
     BASE_URL = "https://music.abcradio.net.au/api/v1/plays/search.json"
 
-
     class ABCRadio:
         """
         API wrapper for accessing playlist history of various
@@ -220,7 +226,9 @@ def __(datetime, mo):
             """
 
             self.available_stations: List[str] = (
-                "jazz,dig,doublej,unearthed,country,triplej,classic,kidslisten".split(",")
+                "jazz,dig,doublej,unearthed,country,triplej,classic,kidslisten".split(
+                    ","
+                )
             )
             self.BASE_URL: str = BASE_URL
             self.latest_search_parameters: Optional[RequestParams] = None
@@ -308,7 +316,6 @@ def __(datetime, mo):
                 params["offset"] = offset
                 yield self.search(**params)
 
-
     class RequestParams(TypedDict, total=False):
         """
         **kwarg arguments to be used when searching in the ABC web api
@@ -337,7 +344,6 @@ def __(datetime, mo):
         limit: int
         offset: int
         station: str
-
 
     @dataclass
     class RadioSong:
@@ -392,7 +398,6 @@ def __(datetime, mo):
                 song=song,
             )
 
-
     @dataclass
     class SearchResult:
         """
@@ -420,7 +425,6 @@ def __(datetime, mo):
                 limit=json_input["limit"],
                 radio_songs=radio_songs,
             )
-
 
     @dataclass
     class Song:
@@ -494,7 +498,6 @@ def __(datetime, mo):
             else:
                 return None
 
-
     @dataclass
     class Artist:
         """
@@ -536,7 +539,6 @@ def __(datetime, mo):
                 url = None
             return cls(url=url, name=json_input["name"], is_australian=is_australian)
 
-
     @dataclass
     class Album:
         """
@@ -574,7 +576,6 @@ def __(datetime, mo):
             else:
                 return None
 
-
     @dataclass
     class Artwork:
         """
@@ -594,7 +595,6 @@ def __(datetime, mo):
             for size in json_input["sizes"]:
                 sizes.append(ArtworkSize.from_json(size))
             return Artwork(url=json_input["url"], type=json_input["type"], sizes=sizes)
-
 
     @dataclass
     class ArtworkSize:
@@ -622,7 +622,6 @@ def __(datetime, mo):
         def aspect_ratio_float(self) -> float:
             width_ratio, height_ratio = self.aspect_ratio.split("x")
             return int(width_ratio) / int(height_ratio)
-
 
     mo.md(
         "[abc_radio_wrapper.py](https://github.com/MatthewBurke1995/ABC-Radio-Wrapper/blob/main/abc_radio_wrapper/abc_radio_wrapper.py) inlined for now."
