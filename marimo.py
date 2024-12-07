@@ -40,11 +40,11 @@ async def __():
         Let's search for the first song played from the beginning of the new year (in UTC) {from_}.
         """
     )
-    return datetime, from_, micropip, mo, timedelta
+    return datetime, from_, micropip, mo, sys, timedelta
 
 
 @app.cell
-def __(ABCRadio, from_, mo, timedelta):
+def __(from_, mo, timedelta):
     from dataclasses import asdict
 
     from abc_radio_wrapper import ABCRadio
@@ -64,7 +64,7 @@ def __(ABCRadio, from_, mo, timedelta):
         {mo.as_html(asdict(first_radio_song))}
         """
     )
-    return abc_radio, asdict, first_radio_song, search_result, to
+    return ABCRadio, abc_radio, asdict, first_radio_song, search_result, to
 
 
 @app.cell(hide_code=True)
@@ -132,36 +132,42 @@ def __(abc_radio, datetime, minutes_slider, mo, timedelta):
             [
                 mo.audio(
                     "https://mediaserviceslive.akamaized.net/hls/live/2038308/triplejnsw/index.m3u8"
-                ),
-                mo.md(
-                    '<span style="color:white">'
-                    + f"{recently_played[0].played_time.astimezone(timezone(timedelta(hours=10))):%I:%M %p}".lstrip(
-                        "0"
-                    )
-                    + "</span>"
-                ),
-                mo.hstack(
-                    [
-                        mo.image(
-                            src=recently_played[0].song.album.artwork.sizes[0].url
-                            if recently_played[0].song.album
-                            and recently_played[0].song.album.artwork
-                            and recently_played[0].song.album.artwork.sizes
-                            else ""
-                        ),
-                        mo.md(
-                            f"""
+                )
+            ]
+            + (
+                [
+                    mo.md(
+                        '<span style="color:white">'
+                        + f"{recently_played[0].played_time.astimezone(timezone(timedelta(hours=10))):%I:%M %p}".lstrip(
+                            "0"
+                        )
+                        + "</span>"
+                    ),
+                    mo.hstack(
+                        [
+                            mo.image(
+                                src=recently_played[0].song.album.artwork.sizes[0].url
+                                if recently_played[0].song.album
+                                and recently_played[0].song.album.artwork
+                                and recently_played[0].song.album.artwork.sizes
+                                else ""
+                            ),
+                            mo.md(
+                                f"""
                             **<span style="color:white">{recently_played[0].song.title}</span>**
 
                             <span style="color:white">{recently_played[0].song.artists[0].name}</span>  
                             <span style="color:white">{recently_played[0].song.album.title}</span>
                             """
-                        ),
-                    ],
-                    justify="start",
-                    align="end",
-                ),
-            ]
+                            ),
+                        ],
+                        justify="start",
+                        align="end",
+                    ),
+                ]
+                if recently_played  # sometimes there are gaps
+                else []
+            )
         )
         .callout()
         .style({"background-color": "#333"})
