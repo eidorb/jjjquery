@@ -17,3 +17,6 @@ dependencies = [
 dev = [
     "marimo>=0.9.31",
 ]
+
+[tool.uv.workspace]
+members = ["lambda-jjjunction"]
