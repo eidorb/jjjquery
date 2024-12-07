@@ -6,19 +6,26 @@ app = marimo.App(width="medium", app_title="jjjquery")
 
 @app.cell(hide_code=True)
 async def __():
+    import sys
     from datetime import datetime, timedelta
-
-    import micropip
 
     import marimo as mo
 
-    # Install hacked abc-radio-wrapper.
-    await micropip.install(
-        [
-            "https://raw.githubusercontent.com/eidorb/jjjquery/refs/heads/main/abc_radio_wrapper-0.3.0-py2.py3-none-any.hacked.whl",
-            "typing-extensions",
-        ]
-    )
+    # Install modules with micropip if running as WASM in the browser.
+    # https://pyodide.org/en/stable/usage/faq.html#how-to-detect-that-code-is-run-with-pyodide
+    if sys.platform == "emscripten":
+        import micropip
+
+        # Install hacked abc-radio-wrapper.
+        await micropip.install(
+            [
+                "https://raw.githubusercontent.com/eidorb/jjjquery/refs/heads/main/abc_radio_wrapper-0.3.0-py2.py3-none-any.hacked.whl",
+                "typing-extensions",
+            ]
+        )
+    else:
+        # They should be installed in the environment.
+        pass
 
     from_ = mo.ui.datetime(value=datetime(year=2024, month=1, day=1))
 
