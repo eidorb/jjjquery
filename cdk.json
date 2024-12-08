@@ -1,0 +1,3 @@
+{
+    "app": "python -c 'import jjjquery as j;j.Jjjquery().synth()'"
+}
