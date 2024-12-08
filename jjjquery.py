@@ -1,14 +1,19 @@
 """jjjquery infrastructure as code."""
 
-import aws_cdk as cdk
+from pathlib import Path
+
 import aws_cdk.aws_certificatemanager as acm
 import aws_cdk.aws_cloudfront as cloudfront
 import aws_cdk.aws_cloudfront_origins as origins
+import aws_cdk.aws_lambda as lambda_
+import aws_cdk.aws_lambda_python_alpha as lambdapy
+import aws_cdk.aws_logs as logs
 import aws_cdk.aws_route53 as route53
 import aws_cdk.aws_route53_targets as targets
+from aws_cdk import App, Environment, RemovalPolicy, Stack, Tags
 
 
-class Jjjquery(cdk.App):
+class Jjjquery(App):
     """Deploys cloud-fronted Lambda jjjfunction."""
 
     def __init__(self) -> None:
@@ -18,15 +23,15 @@ class Jjjquery(cdk.App):
             id="JjjqueryStack",
             # Join the global single point of failure. Custom CloudFront certificates
             # HAVE to reside in us-east-1 anyway...
-            env=cdk.Environment(region="us-east-1"),
+            env=Environment(region="us-east-1"),
             # Show hosted zones with $ aws route53 list-hosted-zones --output yaml
             hosted_zone_id="Z0932427366G4DNP1CWB",
             zone_name="brodie.id.au.",
         )
-        cdk.Tags.of(self).add("project", stack.domain_name)
+        Tags.of(self).add("project", stack.domain_name)
 
 
-class JjjqueryStack(cdk.Stack):
+class JjjqueryStack(Stack):
     """A cloud-fronted Lambda@Edge function running a Marimo app.
 
     Human -> CloudFront -> Lambda@Edge -> mangum -> marimo -> update slider value 😂
@@ -42,7 +47,7 @@ class JjjqueryStack(cdk.Stack):
         self,
         scope,
         id: str,
-        env: cdk.Environment,
+        env: Environment,
         hosted_zone_id: str,
         zone_name: str,
     ):
@@ -69,6 +74,37 @@ class JjjqueryStack(cdk.Stack):
             "Certificate",
             domain_name=self.domain_name,
             validation=acm.CertificateValidation.from_dns(hosted_zone),
+        )
+
+        # Package the Lambda function contained within subdirectory `./function`.
+        python_function = lambdapy.PythonFunction(
+            self,
+            "PythonFunction",
+            entry=str(Path(__file__).parent / "lambda-jjjunction"),
+            runtime=lambda_.Runtime.PYTHON_3_13,
+            # TODO: configure bundling options
+            bundling=lambdapy.BundlingOptions(
+                # exclude some source files.
+                # Maybe use .gitignore?
+                # asset_excludes=[],
+                # uv export --format requirements-txt --output-file lambda-jjjunction/requirements.txt --project lambda-jjjunction
+                # command_hooks=lambdapy.BundlingOptions.command_hooks.e
+            ),
+            handler="jjjandler",
+            index="lambda_jjjunction.py",
+            architecture=lambda_.Architecture.ARM_64,
+            # Setting this ahead of time sounds like a great idea, regardless of
+            # whether or not logs prove useful.
+            log_group=logs.LogGroup(
+                scope=self,
+                id="LogGroup",
+                # Cheaper class of storage for logs.
+                log_group_class=logs.LogGroupClass.INFREQUENT_ACCESS,
+                # During prototyping we want cdk destroy to nuke everything.
+                removal_policy=RemovalPolicy.DESTROY,
+            ),
+            memory_size=1024,
+            retry_attempts=0,
         )
 
         # A CloudFront distribution serves from Lambda@Edge origin.
