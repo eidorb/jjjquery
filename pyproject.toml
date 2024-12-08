@@ -11,6 +11,7 @@ dependencies = [
     "aws-cdk-aws-lambda-python-alpha>=2.172.0a0",
     "aws-cdk-lib>=2.172.0",
     "typing-extensions>=4.12.2",
+    "uv-python-lambda>=0.0.4",
 ]
 
 [dependency-groups]
