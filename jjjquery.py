@@ -138,5 +138,10 @@ class JjjqueryStack(Stack):
         )
 
 
+def scrape() -> None:
+    """Scrapes ABC Radio to stdout."""
+    print("🥁jjjquery!")
+
+
 if __name__ == "__main__":
     Jjjquery().synth()
