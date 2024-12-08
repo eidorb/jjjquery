@@ -1,0 +1,8 @@
+# Mamba environment file.
+name: jjjquery
+channels:
+  - conda-forge
+dependencies:
+  - uv=0.5
+  # Use even-numbered CURRENT release which will move to active LTS https://nodejs.org/en/about/previous-releases
+  - nodejs=22
