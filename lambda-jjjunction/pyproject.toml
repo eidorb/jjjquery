@@ -3,4 +3,6 @@ name = "lambda-jjjunction"
 version = "0.1.0"
 description = "jjjquery Lambda function dependencies"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "mangum>=0.19.0",
+]
