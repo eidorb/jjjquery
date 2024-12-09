@@ -1,4 +1,7 @@
-"""jjjquery infrastructure as code."""
+"""jjjquery infrastructure as code.
+
+Writes scraped ABC Radio data to stdout if run as a module.
+"""
 
 from pathlib import Path
 
@@ -6,10 +9,10 @@ import aws_cdk.aws_certificatemanager as acm
 import aws_cdk.aws_cloudfront as cloudfront
 import aws_cdk.aws_cloudfront_origins as origins
 import aws_cdk.aws_lambda as lambda_
-import aws_cdk.aws_lambda_python_alpha as lambdapy
 import aws_cdk.aws_logs as logs
 import aws_cdk.aws_route53 as route53
 import aws_cdk.aws_route53_targets as targets
+import uv_python_lambda as uvlambda
 from aws_cdk import App, Environment, RemovalPolicy, Stack, Tags
 
 
@@ -77,21 +80,23 @@ class JjjqueryStack(Stack):
         )
 
         # Package the Lambda function contained within subdirectory `./function`.
-        python_function = lambdapy.PythonFunction(
+        python_function = uvlambda.PythonFunction(
             self,
             "PythonFunction",
-            entry=str(Path(__file__).parent / "lambda-jjjunction"),
-            runtime=lambda_.Runtime.PYTHON_3_13,
-            # TODO: configure bundling options
-            bundling=lambdapy.BundlingOptions(
-                # exclude some source files.
-                # Maybe use .gitignore?
-                # asset_excludes=[],
-                # uv export --format requirements-txt --output-file lambda-jjjunction/requirements.txt --project lambda-jjjunction
-                # command_hooks=lambdapy.BundlingOptions.command_hooks.e
-            ),
+            root_dir=str(Path(__file__).parent / "lambda-jjjunction"),
             handler="jjjandler",
             index="lambda_jjjunction.py",
+            # workspace_package="lambda-jjjunction",
+            runtime=lambda_.Runtime.PYTHON_3_13,
+            # TODO: configure bundling options
+            # bundling=uvlambda.BundlingOptions(
+            #     # exclude some source files.
+            #     # Maybe use .gitignore?
+            #     # asset_excludes=[],
+            #     # uv export --format requirements-txt --output-file lambda-jjjunction/requirements.txt --project lambda-jjjunction
+            #     # command_hooks=lambdapy.BundlingOptions.command_hooks.e
+            #     asset_excludes=[]
+            # ),
             architecture=lambda_.Architecture.ARM_64,
             # Setting this ahead of time sounds like a great idea, regardless of
             # whether or not logs prove useful.
@@ -144,4 +149,4 @@ def scrape() -> None:
 
 
 if __name__ == "__main__":
-    Jjjquery().synth()
+    scrape()
